@@ -1,0 +1,23 @@
+Elijah Morris
+Sem Quiz
+10-6-21
+
+1.The purpose of semaphore x is that it's the semaphore that the reader function uses 
+in order to make sure that the first reader waits for wsem to finish before readers can start
+reading and to make sure that the readcount variable is updated properly.
+
+2. The purpose of semaphore wsem is used to enforce mutual exclusion which means in this
+program, only one writer can have access to the shared data area, no other readers or
+writers can access it until the writer is done.
+
+3. The reader that would signal the writer to continue writing would be the last reader out
+or rather when readcount = 0.
+
+4. Only one writer can write at a time since wsem is enforcing mutual exclusion.
+
+5. There can be as many readers as you want reading at one time, however, since the reader 
+function uses wsem to also enforce mutual exclusion, there has to be at least one reader.
+
+6. When semaphore x is initialized to a value of 1, it means that the semaphore is available for use
+and the semWait() function will only work if the value of a semaphore is 1.
+

@@ -1,0 +1,87 @@
+  System V IPC Suite: message queues
+  discuss msgsnd(2) msgrcv(2) 
+
+  SysV Message Queues need:
+  
+    #include <sys/types.h>
+    #include <sys/ipc.h>
+    #include <sys/msg.h>
+
+   int msgsnd(int msqid, const void *msgp, size_t msgsz, int msgflg);
+
+   ssize_t msgrcv(int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg);
+ 
+  Message queues provide a way for a process to send or receive messages from 
+  other processes either in order or by priority. 
+
+  There is usually a system limit of 8K bytes per message. The systems 
+  programmer must first decide on a structure for the messages, of which 
+  the first element MUST be "long mtype" because every message must be 
+  assigned a type. All the other fields are up to the programmer (subject 
+  to the 8K byte limit). Typical example, 
+  
+  struct	priv_msgbuf { 
+  		long	mtype;	/* message type mandatory > 0 */
+  		char	buf[128]; } mesg;
+  
+  The message type (mtype) can be any value > 0. You can load mtype with the 
+  sending process' PID and in this way only grab messages from that process. 
+  The other fields were chosen based on what information needs to be sent.
+  
+  All System V IPC primitives (message queues, shared memory, semaphores)
+  are persistent; they are not released upon exit of the creating process
+  and must be manually removed. Typically, one uses the path to an existing 
+  file together with a random integer to create a key:
+  
+  	static key_t ipckey;
+    int PROJ = 1;
+  	static int msqid;
+  	ipckey = ftok(path_to_existing_file, PROJ);
+  
+  If you are only creating one instance PROJ is usually set to 1; if you 
+  are creating many, PROJ could be an index or a process id. If the file
+  doesn't exist the key will be invalid.  Permissions are like permissions 
+  on files. The creating process calls
+  
+  	#define PERMS 0600	/* rw------- */
+  	msqid = msgget(ipckey, IPC_CREAT | IPC_EXCL | PERMS);
+  	if (msqid < 0) fprintf(stderr, "\n *** create failed ***");
+  
+  The creation could fail if the key was invalid or if the message queue
+  already existed, perhaps because you ran the program before and forgot
+  to delete the queue. If this happens you should use the command "ipcs"
+  to show all ipc structures (message queues, semaphores, shared memory)
+  and the command "ipcrm" to remove the ones you own. See the man pages
+  for details on using these commands.
+  
+  A process which wants to use this existing message queue (and has
+  permission) calls
+  
+  	msqid = msgget(ipckey, PERMS);
+  
+  The process which wants to send a message (with no special options) fills 
+  in the structure mesg, making sure to set mesg.mtype, and sends via
+
+   
+    memset(mesg.buf, 0, strlen(mesg.buf)); /* clear out the space first */
+    stcpy(mesg.buf,"is anyone out there?");
+    mesg.type = 1;
+    msgsnd(mqid, &mesg, sizeof(mesg), 0);
+ 
+    mtype_wanted = 1; 
+  	ret = msgrcv(msqid, &mesg, mtype_wanted, 0);
+  
+  blocking until a message of the desired type is available. If mtype_wanted 
+  is set to zero the first message available will be returned regardless of 
+  type. If mtype is a priority (low numbers have more priority) and if 
+  mtype_wanted is negative then the first message of the lowest mtype which 
+  is less or equal to the absolute value of mtype_wanted is returned. In this 
+  way the queue can be type-driven, independent of type, or priority driven.
+  
+  When the processes are through using the message queue the creator
+  SHOULD remove the queue in order to conserve system resources via
+  
+  	msgctl(msqid, IPC_RMID, (struct msqid_ds *)0);
+  
+  The last argument is ignored for the remove (IPC_RMID) command.
+  

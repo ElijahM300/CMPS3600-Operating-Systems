@@ -1,0 +1,85 @@
+
+  BACKGROUND MATERIAL: UNDERSTANDING A PROCESS IN LINUX
+
+  Before attempting system coding you should become familiar with the important 
+  attributes and parameters attached to a user process from the perspective of
+  the kernel. In particular, you should
+
+  o  understand the output of ps and top
+  o  understand the /proc pseudo-file system
+
+  A Unix process is an image in memory with a thread of execution and a context
+  that restricts resources that the process can access. Since everything in 
+  Unix is a file or a process, the information that the kernel maintains to
+  manage a process is stored in files.
+
+  Much of the kernel information can be displayed with the 'ps' command. The ps
+  command grabs information stored in a pseudo-file system mounted at /proc. 
+  Before starting the coding portion of this lab, read through the man pages 
+  for proc, ps and top.
+
+  You should know how to gather information on a process and understand what 
+  that information means. For example, if you execute a process that runs
+  continuously you can run 'ps' with various switches to get information.
+
+  The output of a process can be written to stderr (descriptor 2) or written
+  to stdout (descriptor 1). You can redirect both to a file:
+
+       ./foo >log 2> err
+
+  Know how to read the man page for Unix commands. In the ps examples below 
+  '|' means OR and anything enclosed in square brackets '[]' is optional:
+
+  Usage: ps -[f | ly | j]u username  
+
+  Useful Commands (sspade is a sample username):
+
+   $ top -u sspade
+   $ ps -fjHlyu sspade
+   $ ps -fu sspade    # full listing of all processes owned by sspade 
+   $ ps -jHu sspade   # display process tree
+   $ ps -lyu sspade   # displays long format including rss 
+
+  You can also get useful information with the top command:
+
+       $ top -u sspade
+
+  You can also get the memory map with the command 
+
+       $ pmap -x [process_id]
+
+  The pmap command can find things you can't as a user because it is allowed 
+  to read kernel memory (/dev/kmem). 
+
+  You can also get a map of processes with the 'pstree' command. (Pstree will 
+  not work on a vt100 terminal unless the emulator supports Unicode.) Pstree 
+  will work under xterm. To start an xterm session:
+
+      $ ssh -Y username@sleipnir "/usr/bin/xterm -ls -geometry 80x50"
+ 
+  In the xterm window:
+
+       $ pstree
+
+  Finally, explore /proc/{pid}. Everything the OS needs to execute the process
+  is stored here. Read the manpage for proc(5).
+   
+      $ man 5 proc
+
+  Using the tools discussed above you can find the following information about 
+  a process. There may be differences between systems in the abbreviations and 
+  units of measurement -- refer to ps(2) manpage for help.
+
+  UID (user ID)
+  PID (processID)
+  PPID (parent processID)
+  TTY or TT (controlling terminal, if any)
+  RSS (resident set size)
+  VSZ or SZ (virtual size)
+  WCHAN (address of event for which process is waiting)  
+  PRI (priority in system-dependent units)
+  CMD (command line invocation via execve())
+  STAT or S (process status: R-runnable, T-stopped, S-sleeping, Z-zombie, ...) 
+  STIME (starting time)
+  TIME (profiling time - user plus system)
+

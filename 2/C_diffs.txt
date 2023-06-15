@@ -1,0 +1,215 @@
+  
+  
+  The Relationship between C, ANSI C, and  C++ 
+  
+  The original version of the C programming language was written by 
+  Brian Kernighan and Dennis Ritchie in the 1970's. The need for 
+  standardization in low-level constructs as well as protection mechanisms 
+  (e.g. function prototypes) led to the development of a second version 
+  of C from 1983-1985 which was formally approved by the American National 
+  Standards Institute (ANSI) as ANSI C in 1988. If you want complete
+  portability you should write in ANSI C and compile with:
+  
+    gcc -ansi
+  
+  C++ is primarily the creation of Bjarne Stroustrup during the years
+  1988-1991 and is almost a superset of ANSI C. The small proportion 
+  (2%) of differences which arise are noted in the summary below. If you
+  want maximum portability of your C++ code, you should stick to 
+  standard (~1998) C++ features and compile with
+  
+    g++ -pedantic
+  
+  Programmers are strongly advised to consult the following references 
+  for more detail:
+  
+    1. "The C Programming Language," by Brian Kernighan and Dennis Ritchie,
+       second edition (covers ANSI C), Prentice Hall.
+  
+    2. "The C++ Programming Language," by Bjarne Stroustrup, second
+       edition, Addison Wesley.
+  
+    3. "C++: The Core Language," by Gregory Satir and Doug Brown, O'Reilly
+       and Associates.
+  
+  ----------------------------------------------
+   Important Differences Between ANSI C and C++
+  ----------------------------------------------
+  
+    C++ requires ALL functions to be declared (including their
+      parameter types) before they are called whereas ANSI C does
+      allow the LAZY declaration
+  
+      int func();
+  
+      which means "don't check arguments." This should NOT be a 
+      problem because safe C programming practice mandates the use 
+      of a function prototype, with fully specified parameters and 
+      return type (even if void). 
+  
+    The declaration 
+  
+      int func();
+  
+      in C++ means that the function doesn't have any arguments, 
+      the same as
+  
+      int func(void);
+  
+      in ANSI C. In the RARE situation where you need to indicate 
+        that you don't want arguments checked (usually because of 
+        low-level or system dependent code) in C++ you have to declare 
+        the function as
+  
+      int func(...);
+  
+    Character literals, such as 'a' have type int in ANSI C. In
+      C++ 'a' has type char. The use of a typecast is safest and
+      avoids confusion: either (int)'a' or (char)'a'.
+  
+  ------------------------------------------------------------------------
+  Common to ANSI C and C++:
+  ------------------------------------------------------------------------
+  
+    98% of the ANSI C programming language is included verbatim 
+    in C++, including the decision structures: if..else, for, while, 
+    do..while, and switch.
+  
+  ------------------------------------------------------------------------
+  Non-object Oriented Features Unique to C++:
+  ------------------------------------------------------------------------
+  
+    // for comments, although almost all modern ANSI C compilers allow 
+      this, some older versions require the "/* ... */" construct
+      for comments. One continual problem with languages is that
+      compiler writers add "extensions" to the language (C or C++)
+        which are often not portable to other platforms. The g++
+      compiler is excellent and free but it does this a lot. It may 
+      be safest to compile with "g++ -pedantic" if you are concerned
+      about portability.
+  
+    The following keywords are added with C++ (many for the object-
+      oriented features) so it is wise to avoid using them in ANSI C, 
+      as, for example, variable names:
+  
+      asm  class  delete  new  private  public  throw
+      try  catch  friend  inline  operator  protected
+      this   template  virtual  
+  
+      bool  explicit  namespace  true  using
+      const_cast  false  reinterpret_cast  typeid
+      wchar_t  dynamic_cast  static_cast  typename
+  
+   In C++ you don't need to use "struct" before the structure tag if 
+     the struct has already been defined, for example
+  
+      struct Person {
+        char   first[32],
+        char  last[32],
+      };
+      Person employee;
+  
+    is legal in C++. This is also true for "enum" and "union".
+    This is NOT allowed in ANSI C. You must declare
+  
+      struct Person employee;
+  
+    The header file <iostream> and the objects: cin, cout, and cerr are 
+    unique to C++. You can mix the ANSI C stream I/O <stdio.h> functions 
+    (such as printf(), scanf(),...) with C++ contructs such as "cin >> " 
+    and "cout <<" IF you first call the static member function of the class ios:
+  
+      ios::sync_with_stdio(); 
+  
+      (this is discussed by Bjarne Stroustrup in Section 10.6 of his 
+      aforementioned book).
+  
+    C++ allows two different functions to have the same name via 
+      type overloading, for example
+  
+      int sum(int x, int y);
+      double sum(double x, double y);
+  
+      is OK in C++, but NOT in ANSI C. Of course, if you accidently
+      give two functions the same name in C++ this will probably
+      introduce strange runtime errors and be hard to trace down.
+  
+    C++ allows the use of inline functions, for example
+  
+      inline max(int n, int m) { return(m > n ? m : n); }
+  
+      hints that the compiler should try to generate inline code (which 
+      will be faster than a procedure call). Inline code would usually 
+      be done in ANSI C using a C preprocessor macro, but preprocessor 
+      macros can introduce bugs which are very hard to find. So the 
+      C++ construct is safer BUT you have no guarantee that inlining 
+      was done (the verb is "hints" not "ensures"). MOST C++ compilers 
+      will inline if you compile with optimization level two "-O2". If 
+      you absolutely need to know that inline code was generated you 
+      will have to use a C preprocessor macro something like
+  
+      #define  max(m,n) ((m) > (n) ? (m) : (n))
+  
+      Note that the parentheses around "m" and "n" are important. Of
+      course, if you want the code to run as quickly as possible it
+      will probably be necessary to write in inline assembly.
+      
+    C++ is somewhat less efficient than ANSI C because more 
+      information in required in linker information in the object 
+      module (usually by "name encoding" of the parameter types) and
+      many (member) function calls will be made indirectly (through
+      a jump table) at run time.  If it is necessary to mix ANSI C and 
+      C++ modules the C++ module should have the extension ".cpp" the 
+      C module the extension ".c" and the extern "C" construct should be 
+      used when referencing the C function from the C++ module, 
+      for example
+  
+      extern "C" int fastcode(int num, int * array);
+  
+    The "const" keyword has some subtle differences in C++, primarily
+      with regard to additional protection.
+  
+    A pointer to void can be converted without a typecast in ANSI C.
+      In C++, the typecast is necessary. This should NOT be a problem
+      because safe C/C++ programming practice mandates the use of a 
+      typecast.
+  
+    Many C++ programmers use "0" as a null pointer since no object
+      is associated with the address 0 and many C++ implementations
+      have the define
+  
+      #define NULL  0
+  
+      in the header files.  This should not be assumed in some low-level 
+      ANSI C driver code where address 0 may be used. It is usually 
+      safer to use "NULL" in both ANSI C and C++.
+  
+    C++ allows loop control variables to be dynamically defined
+      as needed, for example
+  
+      for (int i = 0; i < 10; i++ ) ...
+  
+      is legal in C++ but NOT in ANSI C. In ANSI C all declarations 
+      must precede the code of the procedure.
+  
+    ANSI C does not allow default parameter values, for example
+  
+      double compute(int x, int y, int z = 0);
+  
+      is legal in C++ but NOT in ANSI C.
+  
+    C++ allows one additional method of parameter passing, namely
+      pass by reference (with the '&'). This is not allowed in ANSI C.
+  
+  ------------------------------------------------------------------------
+  Object Oriented Features (e.g. classes, data encapsulation, inheritance,
+    and polymorphism) Are Of Course Unique to C++:
+  ------------------------------------------------------------------------
+  
+    Warning When Using Classes: whenever a change is made to a class declaration 
+    BOTH the member functions of the class AND any code using the class have to 
+    be recompiled.
+    This is because the C++ compliler needs to know the size of an object of the 
+    class in order to allocate a variable of a class type (see Stroustrup, 
+    Section 5.3 for more information).
+  

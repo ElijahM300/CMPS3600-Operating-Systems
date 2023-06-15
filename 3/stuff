@@ -1,0 +1,55 @@
+
+          $ ./lab02
+
+  Hit CTRL-C right after the parent sends a SIGSTOP to the child. Note that 
+  CTRL-C is propagated to all processes (parent and child) that are attached 
+  to the same terminal (tty).
+
+  You will see responses from both the parent and the child for the same
+  Ctrl-C. The child will re-start as soon as you hit CTRL-C, although the 
+  parent is supposed to sleep for 5 seconds. This is because Ctrl-C interrupts 
+  the parent's sleep by setting the sleep timer to 0 (the sleep call returns 
+  the number of seconds left in the timer). To understand what happens when 
+  you interrupt a sleep call with CTRL-C read these manpages.
+ 
+        $ man 3 sleep     # POSIX calls are in section 3 of manpages 
+        $ man 3 sigset    # System V IPC is in manpages section 3
+
+  Note: if you hit Ctrl-C while the child is suspended the child will never
+  get the signal. Which means the parent will be waiting in its handler for
+  the child to exit (which it never will). This is called deadlock. Don't
+  worry about that now - just hit Ctrl-C while the child is running.
+
+  Sample Output without Ctrl-C:
+  $./lab02
+  1
+  2
+  3
+  (you see nothing for 4 seconds)
+  4
+  5
+  6
+  7
+  Child terminated by signal 15
+  Sample Output with Ctrl-c:
+  1
+  2
+  3
+  ^C
+  Child: got SIGINT.
+
+  Parent: got SIGINT.
+  child exited normally with code 33
+
+
+  These macros will get the needed information from the child's exit code:
+
+  if (WIFEXITED(status)) {
+     printf("child exited normally with code, status=%d\n",WEXITSTATUS(status));
+  } else if (WIFSIGNALED(status)) {
+      printf("child terminated by signal %d\n", WTERMSIG(status));
+  } else if (WIFSTOPPED(status)) {
+       printf("child stopped by signal %d\n", WSTOPSIG(status));
+  } else if (WIFCONTINUED(status)) {
+       printf("child continued\n");
+  }

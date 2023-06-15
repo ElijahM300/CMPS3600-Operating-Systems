@@ -1,0 +1,80 @@
+System V IPC Suite: shared memory
+
+Message queues typically limit messages to 8K bytes each and require
+system calls to send and receive. This is impractical when large
+amounts of information must be shared in an efficient manner.
+
+Shared memory provides a way for a group of processes to work on
+and share data. The systems programmer must decide how large a
+block of data is needed and how it will be organized. This is
+typically done with a structure. For example, in the sample program
+message.c we used
+
+	struct _syscall {
+		signed char id;
+		...
+		char	buf[ BUFSIZE_MAX ]; } *shm_ptr;
+
+as the shared area. It is important that all parties reading and
+writing the shared area agree on the organization. They will generally
+use pointers for actual access. It may be a good idea to write an
+initialization macro for the structure, e.g.
+
+	#define clear_syscall(p) \
+		(p)->id = MESG_UNSPEC; \
+		...
+		(p)->buf[0] = '\0';
+
+All System V IPC primitives (message queues, shared memory, semaphores)
+are persistent; they are not released upon exit of the creating process
+and must be manually removed. Typically, one uses the path to an existing 
+file together with an index PROJ to create a key:
+
+	static key_t ipckey;
+	static int shmid;
+	ipckey = ftok(path_to_existing_file, PROJ);
+
+If you are only creating one instance PROJ is usually set to 1; if you 
+are creating many, PROJ could be an index or a process id. If the file
+doesn't exist the key will be invalid.  Permissions are like permissions 
+on files. The creating process calls
+
+	#define PERMS 0600	/* rw------- */
+	shmid = shmget(ipckey, sizeof(struct _syscall), 
+				IPC_CREAT | IPC_EXCL | PERMS);
+	if (shmid < 0) fprintf(stderr, "\n *** allocate failed ***");
+
+The creation could fail if the key was invalid or if the shared memory
+has already been allocated, perhaps because you ran the program before 
+and forgot to release it. If this happens you should use the command "ipcs"
+to show all ipc structures (message queues, semaphores, shared memory)
+and the command "ipcrm" to remove the ones you own. See the man pages
+for details on using these commands. Once the memory has been allocated
+a process needs to get a pointer to it. This is done via
+
+	shm_ptr = (struct _syscall *)shmat(shmid, NULL, 0);
+	if (shm_ptr == (void *)NULL) 
+			fprintf(stderr, "\n *** attach failed ***");
+	clear_syscall(shm_ptr);	/* initialize shared memory */
+
+A process which wants to use this allocated memory (and has permission) 
+calls
+	shmid = shmget(ipckey, sizeof(struct _syscall), PERMS);
+	shm_ptr = (struct _syscall *)shmat(shmid, NULL, 0);
+
+If the process only needs to read the memory it is a good idea to 
+replace the "0" above by "SHM_RDONLY". At this point each process
+can read/write using the standard C arrow construct of following a
+pointer into a field of a structure, e.g.
+
+	shm_ptr->buf[0] = '\0';
+
+Note that synchronization is the responsibility of the programmer.
+When the processes are through using the shared memory the allocator
+SHOULD release the memory in order to conserve system resources via
+
+	shmctl(shmid, IPC_RMID, (struct shmid_ds *)0);
+
+The last argument is ignored for the remove (IPC_RMID) command.
+
+

@@ -1,0 +1,8 @@
+Elijah Morris
+Final Exam
+12-13-21
+
+1.a. The -1 command would block until the semval is greater than or equal to the absolute value of semop.
+
+b. The other requirement would be that the semval would have to start out at at least 1 in order for the grab operstion to proceed since if it's 0,
+the semval will never be greater than or equal to the absolute value of -1 and the process would never proceed. 

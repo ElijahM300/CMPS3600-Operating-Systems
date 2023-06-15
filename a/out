@@ -1,0 +1,42 @@
+close(3)                                = 0
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0@l\0\0\0\0\0\0"..., 832) = 832
+close(3)                                = 0
+read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\260A\2\0\0\0\0\0"..., 832) = 832
+close(3)                                = 0
+pipe([3, 4])                            = 0
+close(3strace: Process 491 attached
+)                                = 0
+[pid   491] close(4)                    = 0
+[pid   491] read(3, strace: Process 492 attached
+ <unfinished ...>
+[pid   492] write(4, "\272\23\0\0", 4)  = 4
+[pid   491] <... read resumed> "\272\23\0\0", 4) = 4
+strace: Process 493 attached
+[pid   491] read(3,  <unfinished ...>
+[pid   493] write(4, "\312:\0\0", 4strace: Process 494 attached
+ <unfinished ...>
+[pid   494] write(4, "\332a\0\0", 4 <unfinished ...>
+[pid   493] <... write resumed> )       = 4
+[pid   494] <... write resumed> )       = 4
+strace: Process 495 attached
+[pid   491] <... read resumed> "\312:\0\0", 4) = 4
+[pid   495] write(4, "\352\210\0\0", 4) = 4
+[pid   491] read(3,  <unfinished ...>
+[pid   492] close(3 <unfinished ...>
+[pid   491] <... read resumed> "\332a\0\0", 4) = 4
+[pid   492] <... close resumed> )       = 0
+[pid   491] read(3, "\352\210\0\0", 4)  = 4
+[pid   491] read(3,  <unfinished ...>
+[pid   492] read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\3402\0\0\0\0\0\0"..., 832) = 832
+[pid   492] close(3)                    = 0
+[pid   495] +++ exited with 0 +++
+[pid   494] +++ exited with 0 +++
+[pid   493] +++ exited with 0 +++
+[pid   492] +++ exited with 0 +++
+[pid   490] close(4)                    = 0
+[pid   491] <... read resumed> "", 4)   = 0
+[pid   491] write(1, "Dot product sum: 80200\n", 23) = 23
+[pid   491] close(3)                    = 0
+[pid   491] +++ exited with 0 +++
+--- SIGCHLD {si_signo=SIGCHLD, si_code=CLD_EXITED, si_pid=491, si_uid=10809, si_status=0, si_utime=0, si_stime=0} ---
++++ exited with 0 +++

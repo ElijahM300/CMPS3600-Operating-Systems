@@ -1,0 +1,9 @@
+Elijah Morris
+Quiz Week 11
+11-3-21
+
+1. There would be around 19 segments left over that are unused after allocation.
+
+2. The sizes of the sgements created would be 200MB each if the partitioning is done in equal segments. 
+
+3. There would be internal fragmentation since there is a lot of wasted space
